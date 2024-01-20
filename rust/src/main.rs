@@ -8,8 +8,8 @@ fn eval_dumb1(hp: &dumb1nn::HyperParams, log_train: bool) {
     let w = params.w();
     let b = params.b();
     println!("w = {w}; b = {b};");
-
-    let vd: Vec<(f64, f64)> = (30..=33).map(|x| (x as f64, (x * 2) as f64)).collect();
+    
+        let vd: Vec<(f64, f64)> = (30..=33).map(|x| (x as f64, (x * 2) as f64)).collect();
     for (x, y) in vd {
         let yh = dumb1nn::model(x, w, b);
         println!("expected = {y}; actual = {yh};")
