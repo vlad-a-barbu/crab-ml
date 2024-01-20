@@ -17,20 +17,35 @@ fn eval_dumb1(hp: &dumb1nn::HyperParams, log_train: bool) {
 }
 
 fn eval_dumb2(hp: &dumb2nn::HyperParams, log_train: bool) {
-    let td: Vec<(f64, f64, f64)> = Vec::from([
+    let or: Vec<(f64, f64, f64)> = Vec::from([
         (1.0, 1.0, 1.0),
         (1.0, 0.0, 1.0),
         (0.0, 1.0, 1.0),
         (0.0, 0.0, 0.0),
     ]);
-    let params = dumb2nn::train(&td, &hp, log_train);
-    let (w1, w2) = (params.w()[0], params.w()[1]);
-    let b = params.b();
-    println!("w1 = {w1}; w2 = {w2}; b = {b};");
+    let and: Vec<(f64, f64, f64)> = Vec::from([
+        (1.0, 1.0, 1.0),
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 0.0),
+    ]);
+    let nand: Vec<(f64, f64, f64)> = Vec::from([
+        (1.0, 1.0, 0.0),
+        (1.0, 0.0, 1.0),
+        (0.0, 1.0, 1.0),
+        (0.0, 0.0, 1.0),
+    ]);
+    for (td, name) in [(or, "OR"), (and, "AND"), (nand, "NAND")] {
+        println!("\n{name}");
+        let params = dumb2nn::train(&td, &hp, log_train);
+        let (w1, w2) = (params.w()[0], params.w()[1]);
+        let b = params.b();
+        println!("w1 = {w1}; w2 = {w2}; b = {b};");
 
-    for (x1, x2, y) in td {
-        let yh = activations::sigmoid(dumb2nn::model([x1, x2], [w1, w2], b));
-        println!("expected = {y}; actual = {yh};")
+        for (x1, x2, y) in td {
+            let yh = activations::sigmoid(dumb2nn::model([x1, x2], [w1, w2], b));
+            println!("expected = {y}; actual = {yh};")
+        }
     }
 }
 
@@ -38,10 +53,10 @@ fn main() {
     let hp = dumb2nn::HyperParams {
         eps: 1e-1,
         lr: 1e-1,
-        epochs: 100_000,
+        epochs: 1_000_000,
         act: Box::new(activations::sigmoid),
-        wrange: (4.0, 8.0),
-        brange: (-1.0, 1.0),
+        wrange: (0.0, 10.0),
+        brange: (0.0, 1.0),
     };
-    eval_dumb2(&hp, true);
+    eval_dumb2(&hp, false);
 }
