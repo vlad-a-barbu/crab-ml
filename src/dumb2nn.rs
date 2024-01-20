@@ -34,14 +34,16 @@ pub struct HyperParams {
     pub(crate) lr: f64,
     pub(crate) epochs: i32,
     pub(crate) act: Box<dyn Fn(f64) -> f64 + Send + Sync>,
+    pub(crate) wrange: (f64, f64),
+    pub(crate) brange: (f64, f64),
 }
 
 pub fn train(td: &Vec<(f64, f64, f64)>, hp: &HyperParams, log: bool) -> Params {
     let mut rng = rand::thread_rng();
-    let mut w1: f64 = rng.gen_range(0.0..9.0);
-    let mut w2: f64 = rng.gen_range(0.0..9.0);
+    let mut w1: f64 = rng.gen_range(hp.wrange.0..hp.wrange.1);
+    let mut w2: f64 = rng.gen_range(hp.wrange.0..hp.wrange.1);
     let w = [w1, w2];
-    let mut b: f64 = rng.gen_range(0.0..3.0);
+    let mut b: f64 = rng.gen_range(hp.brange.0..hp.brange.1);
 
     for i in 0..hp.epochs {
         let c = cost(w, b, &td, &hp.act);

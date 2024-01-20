@@ -36,10 +36,12 @@ fn eval_dumb2(hp: &dumb2nn::HyperParams, log_train: bool) {
 
 fn main() {
     let hp = dumb2nn::HyperParams {
-        eps: 1e-9,
-        lr: 1e-3,
-        epochs: 10_000,
+        eps: 1e-1,
+        lr: 1e-1,
+        epochs: 100_000,
         act: Box::new(activations::sigmoid),
+        wrange: (4.0, 8.0),
+        brange: (-1.0, 1.0),
     };
     eval_dumb2(&hp, true);
 }
