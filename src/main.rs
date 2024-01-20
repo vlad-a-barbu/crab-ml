@@ -16,26 +16,57 @@ fn eval_dumb1(hp: &dumb1nn::HyperParams, log_train: bool) {
     }
 }
 
-fn eval_dumb2(hp: &dumb2nn::HyperParams, log_train: bool) {
+fn eval_dumb2(log_train: bool) {
+    let hp_or = dumb2nn::HyperParams {
+        eps: 1e-1,
+        lr: 1e-1,
+        epochs: 1_000_000,
+        act: Box::new(activations::sigmoid),
+        wrange: (3.0, 9.0),
+        brange: (-2.0, 1.0),
+    };
     let or: Vec<(f64, f64, f64)> = Vec::from([
         (1.0, 1.0, 1.0),
         (1.0, 0.0, 1.0),
         (0.0, 1.0, 1.0),
         (0.0, 0.0, 0.0),
     ]);
+
+    let hp_and = dumb2nn::HyperParams {
+        eps: 1e-1,
+        lr: 1e-1,
+        epochs: 1_000_000,
+        act: Box::new(activations::sigmoid),
+        wrange: (5.0, 10.0),
+        brange: (-3.0, -1.0),
+    };
     let and: Vec<(f64, f64, f64)> = Vec::from([
         (1.0, 1.0, 1.0),
         (1.0, 0.0, 0.0),
         (0.0, 1.0, 0.0),
         (0.0, 0.0, 0.0),
     ]);
+
+    let hp_nand = dumb2nn::HyperParams {
+        eps: 1e-1,
+        lr: 1e-1,
+        epochs: 1_000_000,
+        act: Box::new(activations::sigmoid),
+        wrange: (-6.0, -4.0),
+        brange: (2.0, 4.0),
+    };
     let nand: Vec<(f64, f64, f64)> = Vec::from([
         (1.0, 1.0, 0.0),
         (1.0, 0.0, 1.0),
         (0.0, 1.0, 1.0),
         (0.0, 0.0, 1.0),
     ]);
-    for (td, name) in [(or, "OR"), (and, "AND"), (nand, "NAND")] {
+
+    for (td, name, hp) in [
+        (or, "OR", hp_or),
+        (and, "AND", hp_and),
+        (nand, "NAND", hp_nand),
+    ] {
         println!("\n{name}");
         let params = dumb2nn::train(&td, &hp, log_train);
         let (w1, w2) = (params.w()[0], params.w()[1]);
@@ -50,13 +81,5 @@ fn eval_dumb2(hp: &dumb2nn::HyperParams, log_train: bool) {
 }
 
 fn main() {
-    let hp = dumb2nn::HyperParams {
-        eps: 1e-1,
-        lr: 1e-1,
-        epochs: 1_000_000,
-        act: Box::new(activations::sigmoid),
-        wrange: (0.0, 10.0),
-        brange: (0.0, 1.0),
-    };
-    eval_dumb2(&hp, false);
+    eval_dumb2(false);
 }
