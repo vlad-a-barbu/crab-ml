@@ -39,10 +39,9 @@ logstep w b c = do
 train :: (Floating a, Integral b, Show a) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> b -> IO([a], a)
 train td w b act eps lr 0 = return (w, b)
 train td w b act eps lr n = do
-  let nw = fromIntegral $ length w
-  let (w', b') = graddesc td w b act (cost td w b act) eps lr nw
-  let c = cost td w' b' act
-  logstep w' b' c 
+  let c = cost td w b act
+  logstep w b c
+  let (w', b') = graddesc td w b act c eps lr (fromIntegral $ length w - 1)
   train td w' b' act eps lr (n - 1)
 
 main :: IO()
@@ -56,8 +55,8 @@ main = do
     [1.0]
     1.0
     id
-    0.001 0.001
-    10000
+    0.01 0.01
+    1000
   let fw = forward id
   print $ fw [11.0] w b
   
