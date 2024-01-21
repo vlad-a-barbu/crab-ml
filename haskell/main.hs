@@ -16,40 +16,48 @@ cost td w b act = sum (map (dist w b act) td) / fromIntegral (length td)
 replace [] _ = []
 replace (_:xs) (0,a) = a:xs
 replace (x:xs) (n,a) = if n < 0 then x:xs else x: replace xs (n-1,a)
-
+ 
 graddesc :: (Floating a, Integral b) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> a -> b -> ([a], a)
-graddesc td w b act c eps lr 0 = (w, b)
+graddesc td w b act c eps lr (-1) = (w, b - (cost td w (b + eps) act - c) / eps * lr)
 graddesc td w b act c eps lr wi = do
   let w' = replace w (wi, (w !! fromIntegral wi) + eps)
   let dc = (cost td w' b act - c) / eps
   let w'' = replace w (wi, (w !! fromIntegral wi) - dc * lr)
-  let db = (cost td w (b + eps) act - c) / eps
-  let b' = b - db * lr
   graddesc td w'' b act c eps lr (wi - 1)
 
-train :: (Floating a, Integral b) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> b -> ([a], a)
-train td w b act eps lr 0 = (w, b)
+strw :: (Floating a, Show a) => [a] -> String
+strw [] = "[]"
+strw xs = "[" ++ go xs ++ "]"
+ where
+   go [x] = show x
+   go (x:xs) = show x ++ "," ++ go xs
+
+logstep :: (Floating a, Show a) => [a] -> a -> a -> IO ()
+logstep w b c = do
+  putStrLn $ "w = " ++ strw w ++ "; b = " ++ show b ++ "; c = " ++ show c ++ ";"
+
+train :: (Floating a, Integral b, Show a) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> b -> IO([a], a)
+train td w b act eps lr 0 = return (w, b)
 train td w b act eps lr n = do
-  let c = cost td w b act
   let nw = fromIntegral $ length w
-  let (w', b') = graddesc td w b act c eps lr (nw - 1)
+  let (w', b') = graddesc td w b act (cost td w b act) eps lr nw
+  let c = cost td w' b' act
+  logstep w' b' c 
   train td w' b' act eps lr (n - 1)
 
 main :: IO()
 main = do
-  let (w, b) = train
-        [[0.0, 1.0, 1.0],
-         [1.0, 1.0, 0.0],
-         [1.0, 0.0, 1.0],
-         [0.0, 0.0, 0.0]]
-        [1.0, 1.0]
-        (-1.0)
-        sigmoid
-        0.1 0.1
-        1000000
-  let fw = forward sigmoid
-  putStrLn ("[1.0, 1.0]:\t" ++ show (fw [1.0, 1.0] w b))
-  putStrLn ("[1.0, 0.0]:\t" ++ show (fw [1.0, 0.0] w b))
-  putStrLn ("[0.0, 1.0]:\t" ++ show (fw [0.0, 1.0] w b))
-  putStrLn ("[0.0, 0.0]:\t" ++ show (fw [0.0, 0.0] w b))
+  (w, b) <- train
+    [[2.0, 1.0],
+     [4.0, 2.0],
+     [6.0, 3.0],
+     [8.0, 4.0],
+     [10.0, 5.0]]
+    [1.0]
+    1.0
+    id
+    0.001 0.001
+    10000
+  let fw = forward id
+  print $ fw [11.0] w b
   
