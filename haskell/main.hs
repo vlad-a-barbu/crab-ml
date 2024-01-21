@@ -18,20 +18,22 @@ replace (_:xs) (0,a) = a:xs
 replace (x:xs) (n,a) = if n < 0 then x:xs else x: replace xs (n-1,a)
 
 graddesc :: (Floating a, Integral b) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> a -> b -> ([a], a)
+graddesc td w b act c eps lr 0 = (w, b)
 graddesc td w b act c eps lr wi = do
   let w' = replace w (wi, (w !! fromIntegral wi) + eps)
   let dc = (cost td w' b act - c) / eps
   let w'' = replace w (wi, (w !! fromIntegral wi) - dc * lr)
   let db = (cost td w (b + eps) act - c) / eps
   let b' = b - db * lr
-  if wi < 1 then (w'', b') else graddesc td w'' b act c eps lr (wi - 1)
+  graddesc td w'' b act c eps lr (wi - 1)
 
 train :: (Floating a, Integral b) => [[a]] -> [a] -> a -> (a -> a) -> a -> a -> b -> ([a], a)
+train td w b act eps lr 0 = (w, b)
 train td w b act eps lr n = do
   let c = cost td w b act
   let nw = fromIntegral $ length w
   let (w', b') = graddesc td w b act c eps lr (nw - 1)
-  if n < 1 then (w', b') else train td w' b' act eps lr (n - 1)
+  train td w' b' act eps lr (n - 1)
 
 main :: IO()
 main = do
