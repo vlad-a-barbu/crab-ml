@@ -44,19 +44,18 @@ train td w b act eps lr n = do
   let (w', b') = graddesc td w b act c eps lr (fromIntegral $ length w - 1)
   train td w' b' act eps lr (n - 1)
 
+f x = [x * 3, x]
+generate n = map f [1..n]
+
 main :: IO()
 main = do
   (w, b) <- train
-    [[2.0, 1.0],
-     [4.0, 2.0],
-     [6.0, 3.0],
-     [8.0, 4.0],
-     [10.0, 5.0]]
+    (generate 10)
     [1.0]
     1.0
     id
-    0.01 0.01
-    1000
+    0.0001 0.0001
+    100000
   let fw = forward id
   print $ fw [11.0] w b
   
